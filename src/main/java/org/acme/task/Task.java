@@ -2,6 +2,7 @@ package org.acme.task;
 
 import io.agroal.api.AgroalDataSource;
 import org.acme.CSVExpoter;
+import org.acme.data.Files;
 import org.acme.global.Globals;
 import org.jboss.logmanager.Level;
 
@@ -22,19 +23,23 @@ public class Task implements Runnable {
 
     private int rowStart = 0;
     private int rowEnd = 5000;
+    private String beginDate;
+    private String endDate;
+    private String fileName;
     private String csvFileName;
 
-    public Task(AgroalDataSource dataSource) {
+    public Task(AgroalDataSource dataSource, Files files) {
         this.dataSource = dataSource;
+        this.fileName = files.getFileName();
+        this.beginDate = files.getBeginDate();
+        this.endDate = files.getEndDate();
+        this.csvFileName = files.getCsvFileName(fileName, beginDate, endDate);
     }
 
     @Override
     public synchronized void run() {
-        String beginDate = "2022-01-23";
-        String endDate = "2022-01-24";
         try {
             CSVExpoter csvExpoter = new CSVExpoter();//id, orderType, rowStart, rowEnd, beginDate, endDate);
-            csvFileName = csvExpoter.getFileName("_Export", beginDate, endDate);
             int rowcnt = 0;
             List<Map<String, Object>> listData = csvExpoter.getData(dataSource, rowStart, rowEnd, beginDate, endDate);
             BufferedWriter fileWriter = new BufferedWriter(new FileWriter(csvFileName));
@@ -63,6 +68,6 @@ public class Task implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        LOGGER.log(Level.DEBUG, "task complete " + rowStart + " - " + rowEnd);
+        LOGGER.info( "task complete " + rowStart + " - " + rowEnd);
     }
 }

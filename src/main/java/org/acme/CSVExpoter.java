@@ -9,12 +9,9 @@ import java.sql.*;
 import java.util.*;
 
 public class CSVExpoter {
-
     private int totalCount = -1;
 
-    public CSVExpoter() {
-    }
-
+    public CSVExpoter() {}
     public int getTotalCount() {
         return totalCount;
     }
@@ -76,10 +73,6 @@ public class CSVExpoter {
         return listData;
     }
 
-    public String getFileName(String baseName, String beginDate, String endDate) {
-        return baseName.concat(String.format("_%s~%s.csv", beginDate, endDate));
-    }
-
     public int writeCSV(List<Map<String, Object>> result, BufferedWriter fileWriter, int colcnt) throws Exception {
         int cnt = 0;
         for (Map<String, Object> r : result) {
@@ -87,7 +80,7 @@ public class CSVExpoter {
             int i = 2;
             for (Map.Entry<String, Object> entry : r.entrySet()) {
                 String valueString = "";
-//                System.out.println("Key : " + entry.getKey() + " Value : " + entry.getValue());
+
                 if(entry.getValue() != null) valueString = entry.getValue().toString();
                 if(entry.getValue() instanceof String) {
                     valueString = "\"" + escapeDoubleQuotes(valueString) +"\"";

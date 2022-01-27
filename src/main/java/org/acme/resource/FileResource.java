@@ -1,6 +1,9 @@
 package org.acme.resource;
 
 import io.agroal.api.AgroalDataSource;
+import io.vertx.core.json.JsonObject;
+import org.acme.CSVExpoter;
+import org.acme.data.Files;
 import org.acme.global.Globals;
 import org.acme.task.Task;
 
@@ -23,27 +26,35 @@ public class FileResource {
     @Inject
     Globals globals;
 
-    @GET
+    @POST
     @Path("/files")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response downloadFileRequest() {
-        Runnable r1 = new Task(dataSource);
+    public Response downloadFileRequest(Files files) {
+        String csvFileName = files.getCsvFileName(files.getFileName(), files.getBeginDate(), files.getEndDate());
+
+        Runnable r1 = new Task(dataSource, files);
         ExecutorService pool = Executors.newSingleThreadExecutor();
         pool.execute(r1);
         pool.shutdown();
 
-        return Response.ok().build();
+        JsonObject jsob = new JsonObject();
+        jsob.put("fileName", csvFileName);
+
+        return Response.ok(jsob).build();
     }
 
-    @GET
+    @POST
     @Path("/files/status/{filename}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getFileStatus(@PathParam("filename") String fileName) {
         LOGGER.info("fileStatus: " + globals.getFileStatus(fileName));
-        return Response.ok(Globals.getFileStatus(fileName)).build();
+
+        JsonObject jsob = new JsonObject();
+        jsob.put("status", Globals.getFileStatus(fileName));
+        return Response.ok(jsob).build();
     }
 
-    @GET
+    @POST
     @Path("/files/download/{filename}")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response downloadFile(@PathParam("filename") String fileName) {
@@ -53,7 +64,9 @@ public class FileResource {
             LOGGER.info("file exists: " + fileDownload.exists());
             Response.ResponseBuilder response = Response.ok((Object) fileDownload);
             response.header("Content-Disposition", "attachment;filename=" + fileName);
-            return response.build();
+
+            globals.setFileStatus(fileName, "dead");
+            return Response.ok().build();
         }
         return Response.status(400).build();
     }

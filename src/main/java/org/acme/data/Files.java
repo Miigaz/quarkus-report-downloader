@@ -15,27 +15,32 @@ public class Files {
     public Files() {
     }
 
-    public String getFileName() {
-        return fileName;
+    public String getCsvFileName(String baseName, String beginDate, String endDate) {
+        return baseName.concat(String.format("_%s~%s.csv", beginDate, endDate));
     }
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
     }
 
-    public String getBeginDate() {
-        return beginDate;
-    }
-
     public void setBeginDate(String beginDate) {
         this.beginDate = beginDate;
+    }
+
+    public void setEndDate(String endDate) {
+        this.endDate = endDate;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public String getBeginDate() {
+        return beginDate;
     }
 
     public String getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(String endDate) {
-        this.endDate = endDate;
-    }
 }
